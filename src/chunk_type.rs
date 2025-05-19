@@ -3,32 +3,32 @@ use std::{fmt::Display, str::FromStr};
 use anyhow::bail;
 
 #[derive(Debug, PartialEq, Eq)]
-struct ChunkType([u8; 4]);
+pub(crate) struct ChunkType([u8; 4]);
 
 const FIFTH_BIT: u8 = 0b00100000;
 
 impl ChunkType {
-    fn bytes(&self) -> [u8; 4] {
+    pub fn bytes(&self) -> [u8; 4] {
         self.0
     }
 
-    fn is_valid(&self) -> bool {
+    pub fn is_valid(&self) -> bool {
         (self.0[2] & FIFTH_BIT) >> 5 == 0
     }
 
-    fn is_critical(&self) -> bool {
+    pub fn is_critical(&self) -> bool {
         (self.0[0] & FIFTH_BIT) >> 5 == 0
     }
 
-    fn is_public(&self) -> bool {
+    pub fn is_public(&self) -> bool {
         (self.0[1] & FIFTH_BIT) >> 5 == 0
     }
 
-    fn is_reserved_bit_valid(&self) -> bool {
+    pub fn is_reserved_bit_valid(&self) -> bool {
         self.is_valid()
     }
 
-    fn is_safe_to_copy(&self) -> bool {
+    pub fn is_safe_to_copy(&self) -> bool {
         (self.0[3] & FIFTH_BIT) >> 5 == 1
     }
 }
