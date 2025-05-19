@@ -5,7 +5,7 @@ use std::fmt::Display;
 use crate::chunk_type::ChunkType;
 
 #[derive(Debug)]
-struct Chunk {
+pub(crate) struct Chunk {
     length: u32,
     chunk_type: ChunkType,
     data: Vec<u8>,
@@ -63,6 +63,11 @@ impl Chunk {
             .chain(self.crc.to_be_bytes())
             .collect()
     }
+
+    /// Size in bytes
+    pub fn size(&self) -> usize {
+        (4 + 4 + self.length + 4) as usize
+    }
 }
 
 impl TryFrom<&[u8]> for Chunk {
@@ -78,12 +83,10 @@ impl TryFrom<&[u8]> for Chunk {
         let end_range = 8 + length as usize;
         let data: Vec<u8> = value[8..end_range].into_iter().copied().collect();
 
-        let crc = u32::from_be_bytes(value[end_range..].try_into()?);
+        let crc = u32::from_be_bytes(value[end_range..end_range + 4].try_into()?);
 
         let crc_algo = crc::Crc::<u32>::new(&CRC_32_ISO_HDLC);
         let checksum = crc_algo.checksum(&value[4..end_range]);
-
-        dbg!(crc, checksum);
 
         if crc != checksum {
             bail!(
